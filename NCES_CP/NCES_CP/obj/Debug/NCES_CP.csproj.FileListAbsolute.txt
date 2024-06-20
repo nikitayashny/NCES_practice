@@ -1,0 +1,10 @@
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\NCES_CP.exe.config
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\NCES_CP.exe
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\NCES_CP.pdb
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.csproj.AssemblyReference.cache
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.Properties.Resources.resources
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.csproj.GenerateResource.cache
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.csproj.CoreCompileInputs.cache
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.exe
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.pdb
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.MainForm.resources
