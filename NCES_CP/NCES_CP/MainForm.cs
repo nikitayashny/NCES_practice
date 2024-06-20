@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -57,7 +58,7 @@ namespace NCES_CP
             }
         }
 
-        private void button_sign_Click(object sender, EventArgs e)
+        private async void button_sign_Click(object sender, EventArgs e)
         {
             if (base64String == null)
             {
@@ -69,12 +70,36 @@ namespace NCES_CP
                 MessageBox.Show("Выберите тип!");
                 return;
             }
-            MessageBox.Show($"Всё хорошо, выбран тип {selectedType}, base64 {base64String}");
+            //MessageBox.Show($"Всё хорошо, выбран тип {selectedType}, base64 {base64String}");
+            await SendHttpRequestAsync();
         }
 
         private void button_Check_Signature_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Нет реализации");
+        }
+
+        private async Task SendHttpRequestAsync()
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var data = new StringContent($"{{\"data\": \"{base64String}\"}}", Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign", data);
+
+                    //response.EnsureSuccessStatusCode();
+
+                    string responseContent = await response.Content.ReadAsStringAsync();
+
+                    label_result.Text = responseContent;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
         }
     }
 }

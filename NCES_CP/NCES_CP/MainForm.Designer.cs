@@ -36,6 +36,7 @@
             this.radioButton_flash = new System.Windows.Forms.RadioButton();
             this.button_sign = new System.Windows.Forms.Button();
             this.button_Check_Signature = new System.Windows.Forms.Button();
+            this.label_result = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // openFileDialog
@@ -113,11 +114,21 @@
             this.button_Check_Signature.UseVisualStyleBackColor = true;
             this.button_Check_Signature.Click += new System.EventHandler(this.button_Check_Signature_Click);
             // 
+            // label_result
+            // 
+            this.label_result.AutoSize = true;
+            this.label_result.Location = new System.Drawing.Point(249, 273);
+            this.label_result.Name = "label_result";
+            this.label_result.Size = new System.Drawing.Size(39, 16);
+            this.label_result.TabIndex = 7;
+            this.label_result.Text = "result";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(986, 611);
+            this.Controls.Add(this.label_result);
             this.Controls.Add(this.button_Check_Signature);
             this.Controls.Add(this.button_sign);
             this.Controls.Add(this.radioButton_flash);
@@ -142,6 +153,7 @@
         private System.Windows.Forms.RadioButton radioButton_flash;
         private System.Windows.Forms.Button button_sign;
         private System.Windows.Forms.Button button_Check_Signature;
+        private System.Windows.Forms.Label label_result;
     }
 }
 
