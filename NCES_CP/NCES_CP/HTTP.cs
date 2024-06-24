@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -31,8 +32,26 @@ namespace NCES_CP
                         MessageBox.Show("Перезагрузите КП");
                         return;
                     }
+
+                    // вывод в textBox
                     string formattedJson = json.ToString(Formatting.Indented);
                     textBox_result.Text = formattedJson;
+
+                    // файл sgn
+                    byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
+                    SaveFileDialog saveFileDialog = new SaveFileDialog
+                    {
+                        FileName = "signature.sgn",
+                        Filter = "SGN files (*.sgn)|*.sgn"
+                    };
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string filePath = saveFileDialog.FileName;
+                        File.WriteAllBytes(filePath, signatureBytes);
+                    }
+                    else
+                        MessageBox.Show("Ошибка сохранения подписи.");
                 }
             }
             catch (Exception ex)
@@ -58,8 +77,26 @@ namespace NCES_CP
                         MessageBox.Show("Перезагрузите КП");
                         return;
                     }
+
+                    // вывод в textBox
                     string formattedJson = json.ToString(Formatting.Indented);
                     textBox_result.Text = formattedJson;
+
+                    // файл sgn
+                    byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
+                    SaveFileDialog saveFileDialog = new SaveFileDialog
+                    {
+                        FileName = "signature.sgn",
+                        Filter = "SGN files (*.sgn)|*.sgn"
+                    };
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string filePath = saveFileDialog.FileName;
+                        File.WriteAllBytes(filePath, signatureBytes);
+                    }
+                    else
+                       MessageBox.Show("Ошибка сохранения подписи.");
                 }
             }
             catch (Exception ex)
