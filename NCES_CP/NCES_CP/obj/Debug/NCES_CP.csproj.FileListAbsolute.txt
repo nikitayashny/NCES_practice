@@ -8,3 +8,6 @@ C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.csproj.CoreCompileInputs
 C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.exe
 C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.pdb
 C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.MainForm.resources
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\Newtonsoft.Json.dll
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\Newtonsoft.Json.xml
+C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.csproj.CopyComplete

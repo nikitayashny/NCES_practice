@@ -17,7 +17,8 @@ namespace NCES_CP
     public partial class MainForm : Form
     {
         private string base64String;
-        private string selectedType;
+        private string algorithm_name;
+        private bool isDetached = true;
         public MainForm()
         {
             InitializeComponent();
@@ -25,11 +26,12 @@ namespace NCES_CP
 
         private void ChooseFileButton_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-
-            openFileDialog.Filter = "All Files (*.*)|*.*";
-            openFileDialog.FilterIndex = 1;
-            openFileDialog.RestoreDirectory = true;
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "All Files (*.*)|*.*",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -41,16 +43,6 @@ namespace NCES_CP
                 label_file.Text = "Выбран файл " + selectedFile;
             }
         }
-        private void radioButton_idCard_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButton_idCard.Checked)
-                selectedType = "idcard";
-        }
-        private void radioButton_flesh_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButton_flash.Checked)
-                selectedType = "flash";
-        }
         private async void button_sign_Click(object sender, EventArgs e)
         {
             if (base64String == null)
@@ -58,17 +50,58 @@ namespace NCES_CP
                 MessageBox.Show("Выберите файл!");
                 return;
             }
-            if (selectedType == null)
-            {
-                MessageBox.Show("Выберите тип!");
-                return;
-            }
-
-            await HTTP.SendHttpRequestAsync(base64String, label_result);
+            await HTTP.SignFile(base64String, textBox_result, isDetached);
         }
+
         private void button_Check_Signature_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Нет реализации");
+        }
+
+        private async void button_calculate_hash_Click(object sender, EventArgs e)
+        {
+            if (base64String != null)
+            {
+                algorithm_name = "hbelt";
+                await HTTP.CalculateHash(base64String, textBox_result, algorithm_name);
+            }
+            else
+                MessageBox.Show("Выберите файл");
+        }
+
+        private async void button_sign_attr_Click(object sender, EventArgs e) 
+        {
+            if (base64String == null)
+            {
+                MessageBox.Show("Выберите файл!");
+                return;
+            }
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "All Files (*.*)|*.*",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string selectedSertificate = openFileDialog.FileName;
+
+                byte[] fileBytes = File.ReadAllBytes(selectedSertificate);
+                string sertificate = Convert.ToBase64String(fileBytes);
+                await HTTP.SignFileAttr(base64String, textBox_result, isDetached, sertificate);
+            }     
+        }
+        private void radioButton_Detached_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_Detached.Checked)
+                isDetached = true;
+        }
+        private void radioButton_NotDetached_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_NotDetached.Checked)
+                isDetached = false;
         }
     }
 }
