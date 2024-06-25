@@ -19,6 +19,7 @@ namespace NCES_CP
         private string base64String;
         private string algorithm_name;
         private bool isDetached = true;
+        private string base64Signature;
         public MainForm()
         {
             InitializeComponent();
@@ -53,9 +54,29 @@ namespace NCES_CP
             await HTTP.SignFile(base64String, textBox_result, isDetached);
         }
 
-        private void button_Check_Signature_Click(object sender, EventArgs e)
+        private async void button_Check_Signature_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Нет реализации");
+            if (base64String == null)
+            {
+                MessageBox.Show("Выберите файл!");
+                return;
+            }
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "SGN files (*.sgn)|*.sgn",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string selectedSignature = openFileDialog.FileName;
+
+                byte[] fileBytes = File.ReadAllBytes(selectedSignature);
+                base64Signature = Convert.ToBase64String(fileBytes);
+
+            }
+            await HTTP.VerifySignature(base64String, textBox_result, base64Signature);
         }
 
         private async void button_calculate_hash_Click(object sender, EventArgs e)

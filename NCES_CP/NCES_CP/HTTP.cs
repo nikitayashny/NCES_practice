@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -33,11 +34,9 @@ namespace NCES_CP
                         return;
                     }
 
-                    // вывод в textBox
                     string formattedJson = json.ToString(Formatting.Indented);
                     textBox_result.Text = formattedJson;
 
-                    // файл sgn
                     byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
                     SaveFileDialog saveFileDialog = new SaveFileDialog
                     {
@@ -78,11 +77,9 @@ namespace NCES_CP
                         return;
                     }
 
-                    // вывод в textBox
                     string formattedJson = json.ToString(Formatting.Indented);
                     textBox_result.Text = formattedJson;
 
-                    // файл sgn
                     byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
                     SaveFileDialog saveFileDialog = new SaveFileDialog
                     {
@@ -119,6 +116,48 @@ namespace NCES_CP
                     JObject jsonResponse = JObject.Parse(responseContent);
                     string hashValue = (string)jsonResponse["hash_value"];
                     textBox_result.Text = hashValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
+        }
+
+        public static async Task VerifySignature(string base64String, TextBox textBox_result, string base64Signature)
+        {
+            try
+            {
+
+                using (var httpClient = new HttpClient())
+                {
+                    var data = new StringContent($"{{\"cms\": \"{base64Signature}\", \"data\": \"{base64String}\"}}", Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/verify_cms", data);
+
+                    string responseContent = await response.Content.ReadAsStringAsync();
+
+                    JObject jsonResponse = JObject.Parse(responseContent);
+                    string verify = (string)jsonResponse["verify"];
+
+                    if (verify == "OK")
+                    {
+                        byte[] signatureBytes = Convert.FromBase64String(base64Signature);
+                        X509Certificate2 certificate = new X509Certificate2(signatureBytes);
+                        string subjectName = certificate.Subject;
+                        DateTime validFrom = certificate.NotBefore;
+                        DateTime validTo = certificate.NotAfter;
+                        string certificateInfo = $@"Подпись достоверна 
+Subject: {subjectName}
+Valid From: {validFrom:yyyy-MM-dd}
+Valid To: {validTo:yyyy-MM-dd}
+";
+                        textBox_result.Text = certificateInfo;
+                    }
+                    else if ((int)jsonResponse["error"] == 906)
+                        textBox_result.Text = "Подпись не достоверна";
+                    else
+                        textBox_result.Text = "Ошибка";
                 }
             }
             catch (Exception ex)
