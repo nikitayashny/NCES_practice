@@ -22,119 +22,118 @@ namespace NCES_CP
     internal class HTTP
     {
         private static X509Certificate2 certificate;
-        public static async Task SignFileIdCard(string base64String, TextBox textBox_result, bool isDetached)
+        public static async Task SignFile(string base64String, TextBox textBox_result, bool isDetached, string signMethod, bool isAC, string certificate = null)
         {
             try
             {
-                using (var httpClient = new HttpClient())
+                if (signMethod == "idCard")
                 {
-                    var data = new StringContent($"{{\"data\": \"{base64String}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
-
-                    HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign_kta_cms", data);
-
-                    string responseContent = await response.Content.ReadAsStringAsync();
-
-                    JObject json = JObject.Parse(responseContent);
-
-                    if (json["error"] != null)
+                    if (isAC == false)
                     {
-                        MessageBox.Show("Ошибка: " + json["error"].ToString());
-                        return;
+                        using (var httpClient = new HttpClient())
+                        {
+                            var data = new StringContent($"{{\"data\": \"{base64String}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
+
+                            HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign_kta_cms", data);
+
+                            string responseContent = await response.Content.ReadAsStringAsync();
+
+                            JObject json = JObject.Parse(responseContent);
+
+                            if (json["error"] != null)
+                            {
+                                MessageBox.Show("Ошибка: " + json["error"].ToString());
+                                return;
+                            }
+
+                            string formattedJson = json.ToString(Formatting.Indented);
+                            textBox_result.Text = formattedJson;
+
+                            byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
+                            SaveFileDialog saveFileDialog = new SaveFileDialog
+                            {
+                                FileName = "signature.sgn",
+                                Filter = "SGN files (*.sgn)|*.sgn"
+                            };
+
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string filePath = saveFileDialog.FileName;
+                                File.WriteAllBytes(filePath, signatureBytes);
+                            }
+                            else
+                                MessageBox.Show("Ошибка сохранения подписи.");
+                        }
                     }
-
-                    string formattedJson = json.ToString(Formatting.Indented);
-                    textBox_result.Text = formattedJson;
-
-                    byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
-                    SaveFileDialog saveFileDialog = new SaveFileDialog
+                    if (isAC == true)
                     {
-                        FileName = "signature.sgn",
-                        Filter = "SGN files (*.sgn)|*.sgn"
-                    };
-
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        string filePath = saveFileDialog.FileName;
-                        File.WriteAllBytes(filePath, signatureBytes);
-                    }
-                    else
-                        MessageBox.Show("Ошибка сохранения подписи.");
+                        textBox_result.Text = "Нет реализации.";
+                    }    
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}");
-            }
-        }
-        public static async Task SignFileAvPass(string base64String, TextBox textBox_result, bool isDetached)
-        {
-            try
-            {
-                using (var httpClient = new HttpClient())
+                if (signMethod == "AvPass")
                 {
-                    var data = new StringContent($"{{\"data\": \"{base64String}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
-
-                    HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign", data);
-
-                    string responseContent = await response.Content.ReadAsStringAsync();
-
-                    JObject json = JObject.Parse(responseContent);
-
-                    string formattedJson = json.ToString(Formatting.Indented);
-                    textBox_result.Text = formattedJson;
-
-                    byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
-                    SaveFileDialog saveFileDialog = new SaveFileDialog
+                    if (isAC == false)
                     {
-                        FileName = "signature.sgn",
-                        Filter = "SGN files (*.sgn)|*.sgn"
-                    };
+                        using (var httpClient = new HttpClient())
+                        {
+                            var data = new StringContent($"{{\"data\": \"{base64String}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
 
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        string filePath = saveFileDialog.FileName;
-                        File.WriteAllBytes(filePath, signatureBytes);
+                            HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign", data);
+
+                            string responseContent = await response.Content.ReadAsStringAsync();
+
+                            JObject json = JObject.Parse(responseContent);
+
+                            string formattedJson = json.ToString(Formatting.Indented);
+                            textBox_result.Text = formattedJson;
+
+                            byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
+                            SaveFileDialog saveFileDialog = new SaveFileDialog
+                            {
+                                FileName = "signature.sgn",
+                                Filter = "SGN files (*.sgn)|*.sgn"
+                            };
+
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string filePath = saveFileDialog.FileName;
+                                File.WriteAllBytes(filePath, signatureBytes);
+                            }
+                            else
+                                MessageBox.Show("Ошибка сохранения подписи.");
+                        }
                     }
-                    else
-                        MessageBox.Show("Ошибка сохранения подписи.");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}");
-            }
-        }
-        public static async Task SignFileAttr(string base64String, TextBox textBox_result, bool isDetached, string sertificate)
-        {
-            try
-            {
-                using (var httpClient = new HttpClient())
-                {
-                    var data = new StringContent($"{{\"data\": \"{base64String}\",\"AC\": \"{sertificate}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
-
-                    HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign_cms_ac", data);
-
-                    string responseContent = await response.Content.ReadAsStringAsync();
-
-                    JObject json = JObject.Parse(responseContent);
-
-                    string formattedJson = json.ToString(Formatting.Indented);
-                    textBox_result.Text = formattedJson;
-
-                    byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
-                    SaveFileDialog saveFileDialog = new SaveFileDialog
+                    if (isAC == true)
                     {
-                        FileName = "signatureAvPassAC.sgn",
-                        Filter = "SGN files (*.sgn)|*.sgn"
-                    };
+                        using (var httpClient = new HttpClient())
+                        {
+                            var data = new StringContent($"{{\"data\": \"{base64String}\",\"AC\": \"{certificate}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
 
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        string filePath = saveFileDialog.FileName;
-                        File.WriteAllBytes(filePath, signatureBytes);
+                            HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign_cms_ac", data);
+
+                            string responseContent = await response.Content.ReadAsStringAsync();
+
+                            JObject json = JObject.Parse(responseContent);
+
+                            string formattedJson = json.ToString(Formatting.Indented);
+                            textBox_result.Text = formattedJson;
+
+                            byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
+                            SaveFileDialog saveFileDialog = new SaveFileDialog
+                            {
+                                FileName = "signatureAvPassAC.sgn",
+                                Filter = "SGN files (*.sgn)|*.sgn"
+                            };
+
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string filePath = saveFileDialog.FileName;
+                                File.WriteAllBytes(filePath, signatureBytes);
+                            }
+                            else
+                                MessageBox.Show("Ошибка сохранения подписи.");
+                        }
                     }
-                    else
-                       MessageBox.Show("Ошибка сохранения подписи.");
                 }
             }
             catch (Exception ex)

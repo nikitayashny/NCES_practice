@@ -21,6 +21,8 @@ namespace NCES_CP
         private string base64String;
         private string algorithm_name;
         private bool isDetached = true;
+        private string signMethod = "AvPass";
+        private bool isAC = false;
         private string base64Signature;
         public MainForm()
         {
@@ -45,14 +47,32 @@ namespace NCES_CP
                 label_file.Text = "Выбран файл " + selectedFile;
             }
         }
-        private async void button_sign_Click(object sender, EventArgs e)
+        private async void button_SignFile_Click(object sender, EventArgs e)
         {
             if (base64String == null)
             {
                 MessageBox.Show("Выберите файл!");
                 return;
             }
-            await HTTP.SignFileIdCard(base64String, textBox_result, isDetached);
+            if (isAC == true)
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog
+                {
+                    Filter = "All Files (*.*)|*.*",
+                    FilterIndex = 1,
+                    RestoreDirectory = true
+                };
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedSertificate = openFileDialog.FileName;
+                    byte[] fileBytes = File.ReadAllBytes(selectedSertificate);
+                    string certificate = Convert.ToBase64String(fileBytes);
+                    await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC, certificate);
+                }
+            }
+            else 
+                await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC);
         }
         private async void button_Check_Signature_Click(object sender, EventArgs e)
         {
@@ -90,64 +110,48 @@ namespace NCES_CP
             else
                 MessageBox.Show("Выберите файл");
         }
-        private async void button_sign_attr_Click(object sender, EventArgs e) 
-        {
-            if (base64String == null)
-            {
-                MessageBox.Show("Выберите файл!");
-                return;
-            }
-
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "All Files (*.*)|*.*",
-                FilterIndex = 1,
-                RestoreDirectory = true
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                string selectedSertificate = openFileDialog.FileName;
-
-                byte[] fileBytes = File.ReadAllBytes(selectedSertificate);
-                string sertificate = Convert.ToBase64String(fileBytes);
-                await HTTP.SignFileAttr(base64String, textBox_result, isDetached, sertificate);
-            }     
-        }
         private void button_fullinfo_Click(object sender, EventArgs e)
         {
             HTTP.ShowFullInfo();
-        }
-        private async void button_signAvPass_Click(object sender, EventArgs e)
-        {
-            if (base64String == null)
-            {
-                MessageBox.Show("Выберите файл!");
-                return;
-            }
-            await HTTP.SignFileAvPass(base64String, textBox_result, isDetached);
-        }
-        private void radioButton_Detached_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButton_Detached.Checked)
-            {
-                isDetached = true;
-                MessageBox.Show(isDetached.ToString());
-            }
-
-        }
-        private void radioButton_NotDetached_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButton_NotDetached.Checked)
-            {
-                isDetached = false;
-                MessageBox.Show(isDetached.ToString());
-            }
         }
         private void textBox_result_TextChanged(object sender, EventArgs e)
         {
             if (!textBox_result.Text.StartsWith("Подпись "))
                 button_fullinfo.Visible = false;
         }
+
+        #region radiobuttons
+        private void radioButton_Detached_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_Detached.Checked)
+                isDetached = true;
+
+        }
+        private void radioButton_NotDetached_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_NotDetached.Checked)
+                isDetached = false;
+        }
+        private void radioButton_idCard_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_idCard.Checked)
+                signMethod = "idCard";
+        }
+        private void radioButton_AvPass_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_AvPass.Checked)
+                signMethod = "AvPass";
+        }
+        private void radioButton_yes_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_yes.Checked)
+                isAC = true;
+        }
+        private void radioButton_no_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_no.Checked)
+                isAC = false;
+        }
+        #endregion
     }
 }
