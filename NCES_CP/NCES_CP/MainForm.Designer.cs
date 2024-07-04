@@ -34,11 +34,13 @@
             this.label_choose_type = new System.Windows.Forms.Label();
             this.radioButton_Detached = new System.Windows.Forms.RadioButton();
             this.radioButton_NotDetached = new System.Windows.Forms.RadioButton();
-            this.button_sign = new System.Windows.Forms.Button();
+            this.button_signByIdCard = new System.Windows.Forms.Button();
             this.button_Check_Signature = new System.Windows.Forms.Button();
             this.button_calculate_hash = new System.Windows.Forms.Button();
             this.button_sign_attr = new System.Windows.Forms.Button();
             this.textBox_result = new System.Windows.Forms.TextBox();
+            this.button_fullinfo = new System.Windows.Forms.Button();
+            this.button_signAvPass = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // openFileDialog
@@ -90,25 +92,25 @@
             this.radioButton_NotDetached.AutoSize = true;
             this.radioButton_NotDetached.Location = new System.Drawing.Point(16, 59);
             this.radioButton_NotDetached.Name = "radioButton_NotDetached";
-            this.radioButton_NotDetached.Size = new System.Drawing.Size(109, 20);
+            this.radioButton_NotDetached.Size = new System.Drawing.Size(78, 20);
             this.radioButton_NotDetached.TabIndex = 4;
-            this.radioButton_NotDetached.Text = "Not detached";
+            this.radioButton_NotDetached.Text = "Atached";
             this.radioButton_NotDetached.UseVisualStyleBackColor = true;
             this.radioButton_NotDetached.CheckedChanged += new System.EventHandler(this.radioButton_NotDetached_CheckedChanged);
             // 
-            // button_sign
+            // button_signByIdCard
             // 
-            this.button_sign.Location = new System.Drawing.Point(12, 163);
-            this.button_sign.Name = "button_sign";
-            this.button_sign.Size = new System.Drawing.Size(164, 72);
-            this.button_sign.TabIndex = 5;
-            this.button_sign.Text = "Подписать файл";
-            this.button_sign.UseVisualStyleBackColor = true;
-            this.button_sign.Click += new System.EventHandler(this.button_sign_Click);
+            this.button_signByIdCard.Location = new System.Drawing.Point(12, 163);
+            this.button_signByIdCard.Name = "button_signByIdCard";
+            this.button_signByIdCard.Size = new System.Drawing.Size(164, 72);
+            this.button_signByIdCard.TabIndex = 5;
+            this.button_signByIdCard.Text = "Подписать файл id-картой";
+            this.button_signByIdCard.UseVisualStyleBackColor = true;
+            this.button_signByIdCard.Click += new System.EventHandler(this.button_sign_Click);
             // 
             // button_Check_Signature
             // 
-            this.button_Check_Signature.Location = new System.Drawing.Point(355, 163);
+            this.button_Check_Signature.Location = new System.Drawing.Point(352, 163);
             this.button_Check_Signature.Name = "button_Check_Signature";
             this.button_Check_Signature.Size = new System.Drawing.Size(164, 72);
             this.button_Check_Signature.TabIndex = 6;
@@ -128,7 +130,7 @@
             // 
             // button_sign_attr
             // 
-            this.button_sign_attr.Location = new System.Drawing.Point(185, 163);
+            this.button_sign_attr.Location = new System.Drawing.Point(12, 241);
             this.button_sign_attr.Name = "button_sign_attr";
             this.button_sign_attr.Size = new System.Drawing.Size(164, 72);
             this.button_sign_attr.TabIndex = 10;
@@ -138,24 +140,48 @@
             // 
             // textBox_result
             // 
-            this.textBox_result.Location = new System.Drawing.Point(12, 241);
+            this.textBox_result.Location = new System.Drawing.Point(12, 329);
             this.textBox_result.Multiline = true;
             this.textBox_result.Name = "textBox_result";
             this.textBox_result.ReadOnly = true;
             this.textBox_result.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_result.Size = new System.Drawing.Size(677, 358);
+            this.textBox_result.Size = new System.Drawing.Size(677, 233);
             this.textBox_result.TabIndex = 11;
+            this.textBox_result.TextChanged += new System.EventHandler(this.textBox_result_TextChanged);
+            // 
+            // button_fullinfo
+            // 
+            this.button_fullinfo.Location = new System.Drawing.Point(12, 568);
+            this.button_fullinfo.Name = "button_fullinfo";
+            this.button_fullinfo.Size = new System.Drawing.Size(209, 23);
+            this.button_fullinfo.TabIndex = 12;
+            this.button_fullinfo.Text = "Подробная информация";
+            this.button_fullinfo.UseVisualStyleBackColor = true;
+            this.button_fullinfo.Visible = false;
+            this.button_fullinfo.Click += new System.EventHandler(this.button_fullinfo_Click);
+            // 
+            // button_signAvPass
+            // 
+            this.button_signAvPass.Location = new System.Drawing.Point(182, 163);
+            this.button_signAvPass.Name = "button_signAvPass";
+            this.button_signAvPass.Size = new System.Drawing.Size(164, 72);
+            this.button_signAvPass.TabIndex = 13;
+            this.button_signAvPass.Text = "Подписать файл AvPass";
+            this.button_signAvPass.UseVisualStyleBackColor = true;
+            this.button_signAvPass.Click += new System.EventHandler(this.button_signAvPass_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(702, 603);
+            this.Controls.Add(this.button_signAvPass);
+            this.Controls.Add(this.button_fullinfo);
             this.Controls.Add(this.textBox_result);
             this.Controls.Add(this.button_sign_attr);
             this.Controls.Add(this.button_calculate_hash);
             this.Controls.Add(this.button_Check_Signature);
-            this.Controls.Add(this.button_sign);
+            this.Controls.Add(this.button_signByIdCard);
             this.Controls.Add(this.radioButton_NotDetached);
             this.Controls.Add(this.radioButton_Detached);
             this.Controls.Add(this.label_choose_type);
@@ -178,11 +204,13 @@
         private System.Windows.Forms.Label label_choose_type;
         private System.Windows.Forms.RadioButton radioButton_Detached;
         private System.Windows.Forms.RadioButton radioButton_NotDetached;
-        private System.Windows.Forms.Button button_sign;
+        private System.Windows.Forms.Button button_signByIdCard;
         private System.Windows.Forms.Button button_Check_Signature;
         private System.Windows.Forms.Button button_calculate_hash;
         private System.Windows.Forms.Button button_sign_attr;
         private System.Windows.Forms.TextBox textBox_result;
+        private System.Windows.Forms.Button button_fullinfo;
+        private System.Windows.Forms.Button button_signAvPass;
     }
 }
 

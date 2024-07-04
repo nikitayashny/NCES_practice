@@ -7,8 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
@@ -24,7 +26,6 @@ namespace NCES_CP
         {
             InitializeComponent();
         }
-
         private void ChooseFileButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -51,22 +52,23 @@ namespace NCES_CP
                 MessageBox.Show("Выберите файл!");
                 return;
             }
-            await HTTP.SignFile(base64String, textBox_result, isDetached);
+            await HTTP.SignFileIdCard(base64String, textBox_result, isDetached);
         }
-
         private async void button_Check_Signature_Click(object sender, EventArgs e)
         {
-            if (base64String == null)
+            if (String.IsNullOrEmpty(base64String))
             {
                 MessageBox.Show("Выберите файл!");
                 return;
             }
+
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "SGN files (*.sgn)|*.sgn",
                 FilterIndex = 1,
                 RestoreDirectory = true
             };
+
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -76,9 +78,8 @@ namespace NCES_CP
                 base64Signature = Convert.ToBase64String(fileBytes);
 
             }
-            await HTTP.VerifySignature(base64String, textBox_result, base64Signature);
+            await HTTP.VerifySignature(base64String, textBox_result, base64Signature, button_fullinfo);
         }
-
         private async void button_calculate_hash_Click(object sender, EventArgs e)
         {
             if (base64String != null)
@@ -89,7 +90,6 @@ namespace NCES_CP
             else
                 MessageBox.Show("Выберите файл");
         }
-
         private async void button_sign_attr_Click(object sender, EventArgs e) 
         {
             if (base64String == null)
@@ -114,15 +114,40 @@ namespace NCES_CP
                 await HTTP.SignFileAttr(base64String, textBox_result, isDetached, sertificate);
             }     
         }
+        private void button_fullinfo_Click(object sender, EventArgs e)
+        {
+            HTTP.ShowFullInfo();
+        }
+        private async void button_signAvPass_Click(object sender, EventArgs e)
+        {
+            if (base64String == null)
+            {
+                MessageBox.Show("Выберите файл!");
+                return;
+            }
+            await HTTP.SignFileAvPass(base64String, textBox_result, isDetached);
+        }
         private void radioButton_Detached_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton_Detached.Checked)
+            {
                 isDetached = true;
+                MessageBox.Show(isDetached.ToString());
+            }
+
         }
         private void radioButton_NotDetached_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton_NotDetached.Checked)
+            {
                 isDetached = false;
+                MessageBox.Show(isDetached.ToString());
+            }
+        }
+        private void textBox_result_TextChanged(object sender, EventArgs e)
+        {
+            if (!textBox_result.Text.StartsWith("Подпись "))
+                button_fullinfo.Visible = false;
         }
     }
 }

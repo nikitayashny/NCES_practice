@@ -11,3 +11,10 @@ C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.MainForm.resources
 C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\Newtonsoft.Json.dll
 C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\Newtonsoft.Json.xml
 C:\work\practice_nces\NCES_CP\NCES_CP\obj\Debug\NCES_CP.csproj.CopyComplete
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\BouncyCastle.Crypto.dll
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\System.Formats.Asn1.dll
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\System.ValueTuple.dll
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\System.Buffers.dll
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\System.Numerics.Vectors.dll
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\BouncyCastle.Crypto.xml
+C:\work\practice_nces\NCES_CP\NCES_CP\bin\Debug\System.Formats.Asn1.xml
