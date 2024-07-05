@@ -10,6 +10,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Tls.Crypto;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
@@ -24,6 +28,7 @@ namespace NCES_CP
         private string signMethod = "AvPass";
         private bool isAC = false;
         private string base64Signature;
+ 
         public MainForm()
         {
             InitializeComponent();
@@ -68,6 +73,7 @@ namespace NCES_CP
                     string selectedSertificate = openFileDialog.FileName;
                     byte[] fileBytes = File.ReadAllBytes(selectedSertificate);
                     string certificate = Convert.ToBase64String(fileBytes);
+
                     await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC, certificate);
                 }
             }

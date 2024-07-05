@@ -40,11 +40,11 @@ namespace NCES_CP
 
                             JObject json = JObject.Parse(responseContent);
 
-                            if (json["error"] != null)
+                            /*if (json["error"] != null)
                             {
                                 MessageBox.Show("Ошибка: " + json["error"].ToString());
                                 return;
-                            }
+                            }*/
 
                             string formattedJson = json.ToString(Formatting.Indented);
                             textBox_result.Text = formattedJson;
@@ -67,7 +67,75 @@ namespace NCES_CP
                     }
                     if (isAC == true)
                     {
-                        textBox_result.Text = "Нет реализации.";
+                        using (var httpClient = new HttpClient())
+                        {
+                            var data = new StringContent($"{{\"data\": \"{base64String}\",\"AC\": \"{certificate}\", \"isDetached\": \"{isDetached}\"}}", Encoding.UTF8, "application/json");
+
+                            HttpResponseMessage response = await httpClient.PostAsync("http://127.0.0.1:8084/sign_kta_cms_ac", data);
+
+                            string responseContent = await response.Content.ReadAsStringAsync();
+
+                            JObject json = JObject.Parse(responseContent);
+
+                            string formattedJson = json.ToString(Formatting.Indented);
+
+                            byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
+
+                            //// Сверка серийных номеров сертиифатов (легендарный костыль)
+                            try
+                            {
+                                byte[] fileBytes = Convert.FromBase64String(certificate);
+                                Asn1Object asn1ObjectAttr = Asn1Object.FromByteArray(fileBytes);
+                                string patternAttr = @"\]\]\]\], (.+?)\]\]";
+                                Asn1Object asn1ObjectCert = Asn1Object.FromByteArray(signatureBytes);
+                                string patternCert = @"\[0\]\[\[\[\[0\]2, (.+?),";
+
+                                Regex regexAttr = new Regex(patternAttr);
+                                Match matchAttr = regexAttr.Match(asn1ObjectAttr.ToString());
+
+                                Regex regexCert = new Regex(patternCert);
+                                Match matchCert = regexCert.Match(asn1ObjectCert.ToString());
+
+                                if (matchAttr.Success && matchCert.Success)
+                                {
+                                    string valueAttr = matchAttr.Groups[1].Value;
+                                    string valueCert = matchCert.Groups[1].Value;
+                                    if (valueAttr != valueCert)
+                                    {
+                                        textBox_result.Text = "Серийный номер сертификата в АС не совпадает с основным сертификатом.";
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    textBox_result.Text = "Cерийный номер сертификата не найден.";
+                                    return;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                textBox_result.Text = "Cерийный номер сертификата не найден.";
+                                return;
+                            }
+
+                            /////////////////////////////////////////////////
+
+                            SaveFileDialog saveFileDialog = new SaveFileDialog
+                            {
+                                FileName = "signatureAvPassAC.sgn",
+                                Filter = "SGN files (*.sgn)|*.sgn"
+                            };
+
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string filePath = saveFileDialog.FileName;
+                                File.WriteAllBytes(filePath, signatureBytes);
+                            }
+                            else
+                                MessageBox.Show("Ошибка сохранения подписи.");
+
+                            textBox_result.Text = formattedJson;
+                        }
                     }    
                 }
                 if (signMethod == "AvPass")
@@ -115,10 +183,49 @@ namespace NCES_CP
 
                             JObject json = JObject.Parse(responseContent);
 
-                            string formattedJson = json.ToString(Formatting.Indented);
-                            textBox_result.Text = formattedJson;
+                            string formattedJson = json.ToString(Formatting.Indented);          
 
                             byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
+
+ //// Сверка серийных номеров сертиифатов (легендарный костыль)
+                            try
+                            {
+                                byte[] fileBytes = Convert.FromBase64String(certificate);
+                                Asn1Object asn1ObjectAttr = Asn1Object.FromByteArray(fileBytes);
+                                string patternAttr = @"\]\]\]\], (.+?)\]\]";
+                                Asn1Object asn1ObjectCert = Asn1Object.FromByteArray(signatureBytes);
+                                string patternCert = @"\[0\]\[\[\[\[0\]2, (.+?),";
+
+                                Regex regexAttr = new Regex(patternAttr);
+                                Match matchAttr = regexAttr.Match(asn1ObjectAttr.ToString());
+
+                                Regex regexCert = new Regex(patternCert);
+                                Match matchCert = regexCert.Match(asn1ObjectCert.ToString());
+
+                                if (matchAttr.Success && matchCert.Success)
+                                {
+                                    string valueAttr = matchAttr.Groups[1].Value;
+                                    string valueCert = matchCert.Groups[1].Value;
+                                    if (valueAttr != valueCert)
+                                    {
+                                        textBox_result.Text = "Серийный номер сертификата в АС не совпадает с основным сертификатом.";
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    textBox_result.Text = "Cерийный номер сертификата не найден.";
+                                    return;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                textBox_result.Text = "Cерийный номер сертификата не найден.";
+                                return;
+                            }
+     
+/////////////////////////////////////////////////
+
                             SaveFileDialog saveFileDialog = new SaveFileDialog
                             {
                                 FileName = "signatureAvPassAC.sgn",
@@ -132,6 +239,8 @@ namespace NCES_CP
                             }
                             else
                                 MessageBox.Show("Ошибка сохранения подписи.");
+
+                            textBox_result.Text = formattedJson;
                         }
                     }
                 }

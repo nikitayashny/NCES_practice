@@ -56,7 +56,7 @@ namespace NCES_CP
                 }
             }
 
-            sb.Append(input.Substring(currentIndex));
+            sb.Append(input.Substring(currentIndex));   // чуть менее легендарный костыль
             return sb.ToString();
         }
     }
