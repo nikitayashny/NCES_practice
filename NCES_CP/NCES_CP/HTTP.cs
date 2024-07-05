@@ -22,7 +22,7 @@ namespace NCES_CP
     internal class HTTP
     {
         private static X509Certificate2 certificate;
-        public static async Task SignFile(string base64String, TextBox textBox_result, bool isDetached, string signMethod, bool isAC, string certificate = null)
+        public static async Task SignFile(string base64String, TextBox textBox_result, bool isDetached, string signMethod, bool isAC, string fileName, string certificate = null)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace NCES_CP
                             byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
                             SaveFileDialog saveFileDialog = new SaveFileDialog
                             {
-                                FileName = "signature.sgn",
+                                FileName = $"{fileName}IdCard.sgn",
                                 Filter = "SGN files (*.sgn)|*.sgn"
                             };
 
@@ -122,7 +122,7 @@ namespace NCES_CP
 
                             SaveFileDialog saveFileDialog = new SaveFileDialog
                             {
-                                FileName = "signatureAvPassAC.sgn",
+                                FileName = $"{fileName}IdCardAC.sgn",
                                 Filter = "SGN files (*.sgn)|*.sgn"
                             };
 
@@ -158,7 +158,7 @@ namespace NCES_CP
                             byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
                             SaveFileDialog saveFileDialog = new SaveFileDialog
                             {
-                                FileName = "signature.sgn",
+                                FileName = $"{fileName}AvPass.sgn",
                                 Filter = "SGN files (*.sgn)|*.sgn"
                             };
 
@@ -228,7 +228,7 @@ namespace NCES_CP
 
                             SaveFileDialog saveFileDialog = new SaveFileDialog
                             {
-                                FileName = "signatureAvPassAC.sgn",
+                                FileName = $"{fileName}AvPassAC.sgn",
                                 Filter = "SGN files (*.sgn)|*.sgn"
                             };
 

@@ -28,7 +28,8 @@ namespace NCES_CP
         private string signMethod = "AvPass";
         private bool isAC = false;
         private string base64Signature;
- 
+        private string fileName;
+
         public MainForm()
         {
             InitializeComponent();
@@ -45,7 +46,8 @@ namespace NCES_CP
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string selectedFile = openFileDialog.FileName;
-
+                fileName = Path.GetFileNameWithoutExtension(selectedFile);
+                
                 byte[] fileBytes = File.ReadAllBytes(selectedFile);
                 base64String = Convert.ToBase64String(fileBytes);
 
@@ -73,12 +75,12 @@ namespace NCES_CP
                     string selectedSertificate = openFileDialog.FileName;
                     byte[] fileBytes = File.ReadAllBytes(selectedSertificate);
                     string certificate = Convert.ToBase64String(fileBytes);
-
-                    await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC, certificate);
+                    
+                    await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC, fileName, certificate);
                 }
             }
             else 
-                await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC);
+                await HTTP.SignFile(base64String, textBox_result, isDetached, signMethod, isAC, fileName);
         }
         private async void button_Check_Signature_Click(object sender, EventArgs e)
         {
