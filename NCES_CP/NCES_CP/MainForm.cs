@@ -24,7 +24,7 @@ namespace NCES_CP
     {
         private string base64String;
         private string algorithm_name;
-        private bool isDetached = true;
+        private string isDetached = "true";
         private string signMethod = "AvPass";
         private bool isAC = false;
         private string base64Signature;
@@ -132,13 +132,13 @@ namespace NCES_CP
         private void radioButton_Detached_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton_Detached.Checked)
-                isDetached = true;
+                isDetached = "true";
 
         }
         private void radioButton_NotDetached_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButton_NotDetached.Checked)
-                isDetached = false;
+                isDetached = "false";
         }
         private void radioButton_idCard_CheckedChanged(object sender, EventArgs e)
         {

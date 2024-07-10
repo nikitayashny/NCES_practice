@@ -22,7 +22,7 @@ namespace NCES_CP
     internal class HTTP
     {
         private static X509Certificate2 certificate;
-        public static async Task SignFile(string base64String, TextBox textBox_result, bool isDetached, string signMethod, bool isAC, string fileName, string certificate = null)
+        public static async Task SignFile(string base64String, TextBox textBox_result, string isDetached, string signMethod, bool isAC, string fileName, string certificate = null)
         {
             try
             {
@@ -38,31 +38,29 @@ namespace NCES_CP
 
                             string responseContent = await response.Content.ReadAsStringAsync();
 
-                            JObject json = JObject.Parse(responseContent);
-
-                            /*if (json["error"] != null)
-                            {
-                                MessageBox.Show("Ошибка: " + json["error"].ToString());
-                                return;
-                            }*/
+                            JObject json = JObject.Parse(responseContent);                           
 
                             string formattedJson = json.ToString(Formatting.Indented);
                             textBox_result.Text = formattedJson;
 
                             byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
-                            SaveFileDialog saveFileDialog = new SaveFileDialog
-                            {
-                                FileName = $"{fileName}IdCard.sgn",
-                                Filter = "SGN files (*.sgn)|*.sgn"
-                            };
 
-                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            if ((string)json["sig"] != "")
                             {
-                                string filePath = saveFileDialog.FileName;
-                                File.WriteAllBytes(filePath, signatureBytes);
-                            }
-                            else
-                                MessageBox.Show("Ошибка сохранения подписи.");
+                                SaveFileDialog saveFileDialog = new SaveFileDialog
+                                {
+                                    FileName = $"{fileName}IdCard.sgn",
+                                    Filter = "SGN files (*.sgn)|*.sgn"
+                                };
+
+                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                                {
+                                    string filePath = saveFileDialog.FileName;
+                                    File.WriteAllBytes(filePath, signatureBytes);
+                                }
+                                else
+                                    MessageBox.Show("Ошибка сохранения подписи.");
+                            }                            
                         }
                     }
                     if (isAC == true)
@@ -81,58 +79,61 @@ namespace NCES_CP
 
                             byte[] signatureBytes = Convert.FromBase64String((string)json["sig"]);
 
-                            //// Сверка серийных номеров сертиифатов (легендарный костыль)
-                            try
+                            if ((string)json["sig"] != "")
                             {
-                                byte[] fileBytes = Convert.FromBase64String(certificate);
-                                Asn1Object asn1ObjectAttr = Asn1Object.FromByteArray(fileBytes);
-                                string patternAttr = @"\]\]\]\], (.+?)\]\]";
-                                Asn1Object asn1ObjectCert = Asn1Object.FromByteArray(signatureBytes);
-                                string patternCert = @"\[0\]\[\[\[\[0\]2, (.+?),";
-
-                                Regex regexAttr = new Regex(patternAttr);
-                                Match matchAttr = regexAttr.Match(asn1ObjectAttr.ToString());
-
-                                Regex regexCert = new Regex(patternCert);
-                                Match matchCert = regexCert.Match(asn1ObjectCert.ToString());
-
-                                if (matchAttr.Success && matchCert.Success)
+                                //// Сверка серийных номеров сертиифатов (легендарный костыль)
+                                try
                                 {
-                                    string valueAttr = matchAttr.Groups[1].Value;
-                                    string valueCert = matchCert.Groups[1].Value;
-                                    if (valueAttr != valueCert)
+                                    byte[] fileBytes = Convert.FromBase64String(certificate);
+                                    Asn1Object asn1ObjectAttr = Asn1Object.FromByteArray(fileBytes);
+                                    string patternAttr = @"\]\]\]\], (.+?)\]\]";
+                                    Asn1Object asn1ObjectCert = Asn1Object.FromByteArray(signatureBytes);
+                                    string patternCert = @"\[0\]\[\[\[\[0\]2, (.+?),";
+
+                                    Regex regexAttr = new Regex(patternAttr);
+                                    Match matchAttr = regexAttr.Match(asn1ObjectAttr.ToString());
+
+                                    Regex regexCert = new Regex(patternCert);
+                                    Match matchCert = regexCert.Match(asn1ObjectCert.ToString());
+
+                                    if (matchAttr.Success && matchCert.Success)
                                     {
-                                        textBox_result.Text = "Серийный номер сертификата в АС не совпадает с основным сертификатом.";
+                                        string valueAttr = matchAttr.Groups[1].Value;
+                                        string valueCert = matchCert.Groups[1].Value;
+                                        if (valueAttr != valueCert)
+                                        {
+                                            textBox_result.Text = "Серийный номер сертификата в АС не совпадает с основным сертификатом.";
+                                            return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        textBox_result.Text = "Cерийный номер сертификата не найден.";
                                         return;
                                     }
                                 }
-                                else
+                                catch (Exception ex)
                                 {
                                     textBox_result.Text = "Cерийный номер сертификата не найден.";
                                     return;
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                textBox_result.Text = "Cерийный номер сертификата не найден.";
-                                return;
-                            }
 
-                            /////////////////////////////////////////////////
+                                /////////////////////////////////////////////////
+                            
+                                SaveFileDialog saveFileDialog = new SaveFileDialog
+                                {
+                                    FileName = $"{fileName}IdCardAC.sgn",
+                                    Filter = "SGN files (*.sgn)|*.sgn"
+                                };
 
-                            SaveFileDialog saveFileDialog = new SaveFileDialog
-                            {
-                                FileName = $"{fileName}IdCardAC.sgn",
-                                Filter = "SGN files (*.sgn)|*.sgn"
-                            };
-
-                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                            {
-                                string filePath = saveFileDialog.FileName;
-                                File.WriteAllBytes(filePath, signatureBytes);
-                            }
-                            else
-                                MessageBox.Show("Ошибка сохранения подписи.");
+                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                                {
+                                    string filePath = saveFileDialog.FileName;
+                                    File.WriteAllBytes(filePath, signatureBytes);
+                                }
+                                else
+                                    MessageBox.Show("Ошибка сохранения подписи.");
+                            }                
 
                             textBox_result.Text = formattedJson;
                         }
@@ -155,20 +156,27 @@ namespace NCES_CP
                             string formattedJson = json.ToString(Formatting.Indented);
                             textBox_result.Text = formattedJson;
 
-                            byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
-                            SaveFileDialog saveFileDialog = new SaveFileDialog
+                            try
                             {
-                                FileName = $"{fileName}AvPass.sgn",
-                                Filter = "SGN files (*.sgn)|*.sgn"
-                            };
+                                byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
+                                SaveFileDialog saveFileDialog = new SaveFileDialog
+                                {
+                                    FileName = $"{fileName}AvPass.sgn",
+                                    Filter = "SGN files (*.sgn)|*.sgn"
+                                };
 
-                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                            {
-                                string filePath = saveFileDialog.FileName;
-                                File.WriteAllBytes(filePath, signatureBytes);
+                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                                {
+                                    string filePath = saveFileDialog.FileName;
+                                    File.WriteAllBytes(filePath, signatureBytes);
+                                }
+                                else
+                                    MessageBox.Show("Ошибка сохранения подписи.");
                             }
-                            else
-                                MessageBox.Show("Ошибка сохранения подписи.");
+                            catch (Exception ex) 
+                            {
+                                textBox_result.Text = ex.Message;
+                            }
                         }
                     }
                     if (isAC == true)
@@ -183,10 +191,9 @@ namespace NCES_CP
 
                             JObject json = JObject.Parse(responseContent);
 
-                            string formattedJson = json.ToString(Formatting.Indented);          
-
+                            string formattedJson = json.ToString(Formatting.Indented);
                             byte[] signatureBytes = Convert.FromBase64String((string)json["cms"]);
-
+                           
  //// Сверка серийных номеров сертиифатов (легендарный костыль)
                             try
                             {
@@ -218,7 +225,7 @@ namespace NCES_CP
                                     return;
                                 }
                             }
-                            catch (Exception ex)
+                            catch
                             {
                                 textBox_result.Text = "Cерийный номер сертификата не найден.";
                                 return;
@@ -324,6 +331,7 @@ namespace NCES_CP
             catch (Exception ex)
             {
                 MessageBox.Show($"Error: {ex.Message}");
+                textBox_result.Text = "Подпись неверна.";
             }
         }
         public static void ShowFullInfo()
